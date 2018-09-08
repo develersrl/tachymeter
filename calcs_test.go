@@ -1,12 +1,11 @@
 package tachymeter_test
 
 import (
-	//"fmt"
 	"sort"
 	"testing"
 	"time"
 
-	"github.com/jamiealquiza/tachymeter"
+	"github.com/develersrl/tachymeter"
 )
 
 func TestCalc(t *testing.T) {
