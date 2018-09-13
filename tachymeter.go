@@ -104,7 +104,10 @@ func (m *Tachymeter) Reset() {
 
 // AddTime adds a time.Duration to Tachymeter.
 func (m *Tachymeter) AddTime(t time.Duration) {
-	m.Times[(atomic.AddUint64(&m.Count, 1)-1)%m.Size] = t
+	m.Lock()
+	m.Times[m.Count%m.Size] = t
+	m.Count++
+	m.Unlock()
 }
 
 // SetWallTime optionally sets an elapsed wall time duration.

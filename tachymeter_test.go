@@ -1,6 +1,7 @@
 package tachymeter_test
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -48,6 +49,36 @@ func TestAddTime(t *testing.T) {
 	ta := tachymeter.New(&tachymeter.Config{Size: 3})
 
 	ta.AddTime(time.Millisecond)
+
+	if ta.Times[0] != time.Millisecond {
+		t.Fail()
+	}
+}
+
+func TestAddTimeConcurrent(t *testing.T) {
+	const (
+		ngoroutines = 10
+		ntimes      = 100
+	)
+
+	ta := tachymeter.New(&tachymeter.Config{Size: 3})
+
+	start := time.Now()
+
+	var wg sync.WaitGroup
+	wg.Add(ngoroutines)
+
+	for i := 0; i < ngoroutines; i++ {
+		go func() {
+			for j := 0; j < ntimes; j++ {
+				ta.AddTime(time.Millisecond)
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+
+	ta.SetWallTime(time.Since(start))
 
 	if ta.Times[0] != time.Millisecond {
 		t.Fail()
