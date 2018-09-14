@@ -90,18 +90,19 @@ func New(c *Config) *Tachymeter {
 	}
 }
 
-// Reset resets a Tachymeter
-// instance for reuse.
+// Reset resets a Tachymeter instance for reuse.
+// This function is safe for concurrent use by multiple goroutines.
 func (m *Tachymeter) Reset() {
-	// This lock is obviously not needed for
-	// the m.Count update, rather to prevent a
-	// Tachymeter reset while Calc is being called.
+	// This lock is needed for:
+	// - m.Count update in AddTime
+	// - Calc
 	m.Lock()
 	m.Count = 0
 	m.Unlock()
 }
 
-// AddTime adds a time.Duration to Tachymeter.
+// AddTime adds a time.Duration to Tachymeter. This function is safe for
+// concurrent use by multiple goroutines.
 func (m *Tachymeter) AddTime(t time.Duration) {
 	m.Lock()
 	m.Times[m.Count%m.Size] = t
@@ -113,6 +114,8 @@ func (m *Tachymeter) AddTime(t time.Duration) {
 // This affects rate output by using total events counted over time.
 // This is useful for concurrent/parallelized events that overlap
 // in wall time and are writing to a shared Tachymeter instance.
+//
+// This function is NOT SAFE for concurrent use by multiple goroutines.
 func (m *Tachymeter) SetWallTime(t time.Duration) {
 	m.WallTime = t
 }
