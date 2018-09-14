@@ -114,17 +114,16 @@ func (ts timeSlice) hgram(b int) (*Histogram, time.Duration) {
 // These should be self-explanatory:
 
 func (ts timeSlice) cumulative() time.Duration {
-	var total time.Duration
+	var total float64
 	for _, t := range ts {
-		total += t
+		total += float64(t)
 	}
 
-	return total
+	return time.Duration(total)
 }
 
 func (ts timeSlice) hMean() time.Duration {
 	var total float64
-
 	for _, t := range ts {
 		total += (1 / float64(t))
 	}
@@ -133,11 +132,11 @@ func (ts timeSlice) hMean() time.Duration {
 }
 
 func (ts timeSlice) avg() time.Duration {
-	var total time.Duration
+	var total float64
 	for _, t := range ts {
-		total += t
+		total += float64(t)
 	}
-	return time.Duration(int(total) / ts.Len())
+	return time.Duration(total / float64(ts.Len()))
 }
 
 func (ts timeSlice) p(p float64) time.Duration {
@@ -164,14 +163,14 @@ func (ts timeSlice) long5p() time.Duration {
 		return ts[ts.Len()-1]
 	}
 
-	var t time.Duration
+	var total float64
 	var i int
 	for _, n := range set {
-		t += n
+		total += float64(n)
 		i++
 	}
 
-	return time.Duration(int(t) / i)
+	return time.Duration(total / float64(i))
 }
 
 func (ts timeSlice) short5p() time.Duration {
@@ -181,14 +180,14 @@ func (ts timeSlice) short5p() time.Duration {
 		return ts[0]
 	}
 
-	var t time.Duration
+	var total float64
 	var i int
 	for _, n := range set {
-		t += n
+		total += float64(n)
 		i++
 	}
 
-	return time.Duration(int(t) / i)
+	return time.Duration(total / float64(i))
 }
 
 func (ts timeSlice) min() time.Duration {
