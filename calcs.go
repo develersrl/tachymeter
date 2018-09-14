@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"sort"
-	"sync/atomic"
 	"time"
 )
 
@@ -14,29 +13,33 @@ func (m *Tachymeter) Calc() *Metrics {
 	metrics := &Metrics{
 		Histogram: &Histogram{},
 	}
-	if atomic.LoadUint64(&m.Count) == 0 {
+
+	walltime := m.WallTime
+	hbins := m.HBins
+
+	m.RLock()
+	metrics.Count = int(m.Count)
+
+	metrics.Samples = int(math.Min(float64(metrics.Count), float64(m.Size)))
+	times := make(timeSlice, metrics.Samples)
+	copy(times, m.Times[:metrics.Samples])
+	m.RUnlock()
+
+	if len(times) == 0 {
 		return metrics
 	}
 
-	m.Lock()
-
-	metrics.Samples = int(math.Min(float64(atomic.LoadUint64(&m.Count)), float64(m.Size)))
-	metrics.Count = int(atomic.LoadUint64(&m.Count))
-	times := make(timeSlice, metrics.Samples)
-	copy(times, m.Times[:metrics.Samples])
 	sort.Sort(times)
 
 	metrics.Time.Cumulative = times.cumulative()
 	var rateTime float64
-	if m.WallTime != 0 {
-		rateTime = float64(metrics.Count) / float64(m.WallTime)
+	if walltime != 0 {
+		rateTime = float64(metrics.Count) / float64(walltime)
 	} else {
 		rateTime = float64(metrics.Samples) / float64(metrics.Time.Cumulative)
 	}
 
 	metrics.Rate.Second = rateTime * 1e9
-
-	m.Unlock()
 
 	metrics.Time.Avg = times.avg()
 	metrics.Time.HMean = times.hMean()
@@ -52,7 +55,7 @@ func (m *Tachymeter) Calc() *Metrics {
 	metrics.Time.Range = times.srange()
 	metrics.Time.StdDev = times.stdDev()
 
-	metrics.Histogram, metrics.HistogramBinSize = times.hgram(m.HBins)
+	metrics.Histogram, metrics.HistogramBinSize = times.hgram(hbins)
 
 	return metrics
 }

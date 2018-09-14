@@ -9,7 +9,6 @@ import (
 	"math"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
@@ -25,7 +24,7 @@ type Config struct {
 // Tachymeter holds event durations
 // and counts.
 type Tachymeter struct {
-	sync.Mutex
+	sync.RWMutex
 	Size     uint64
 	Times    timeSlice
 	Count    uint64
@@ -98,7 +97,7 @@ func (m *Tachymeter) Reset() {
 	// the m.Count update, rather to prevent a
 	// Tachymeter reset while Calc is being called.
 	m.Lock()
-	atomic.StoreUint64(&m.Count, 0)
+	m.Count = 0
 	m.Unlock()
 }
 
