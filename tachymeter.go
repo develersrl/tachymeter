@@ -59,26 +59,30 @@ func (p timeSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 // fall within the low-high time duration range.
 type Histogram []map[string]uint64
 
+// Time holds the statistics values, calculated from the events within the
+// sample window.
+type Time struct {
+	Cumulative time.Duration // Cumulative time of all sampled events.
+	HMean      time.Duration // Event duration harmonic mean.
+	Avg        time.Duration // Event duration average.
+	P50        time.Duration // Event duration 50th percentile.
+	P75        time.Duration // Event duration 75th percentile.
+	P95        time.Duration // Event duration 95th percentile.
+	P99        time.Duration // Event duration 99th percentile.
+	P999       time.Duration // Event duration 999th percentile.
+	Long5p     time.Duration // Average of the longest 5% event durations.
+	Short5p    time.Duration // Average of the shortest 5% event durations.
+	Max        time.Duration // Highest event duration.
+	Min        time.Duration // Lowest event duration.
+	StdDev     time.Duration // Standard deviation.
+	Range      time.Duration // Event duration range (Max-Min).
+}
+
 // Metrics holds the calculated outputs
 // produced from a Tachymeter sample set.
 type Metrics struct {
-	Name string   // Name is the metric name.
-	Time struct { // All values under Time are selected entirely from events within the sample window.
-		Cumulative time.Duration // Cumulative time of all sampled events.
-		HMean      time.Duration // Event duration harmonic mean.
-		Avg        time.Duration // Event duration average.
-		P50        time.Duration // Event duration nth percentiles ..
-		P75        time.Duration
-		P95        time.Duration
-		P99        time.Duration
-		P999       time.Duration
-		Long5p     time.Duration // Average of the longest 5% event durations.
-		Short5p    time.Duration // Average of the shortest 5% event durations.
-		Max        time.Duration // Highest event duration.
-		Min        time.Duration // Lowest event duration.
-		StdDev     time.Duration // Standard deviation.
-		Range      time.Duration // Event duration range (Max-Min).
-	}
+	Name string // Name is the metric name.
+	Time Time
 	Rate struct {
 		// Per-second rate based on event duration avg. via Metrics.Cumulative / Metrics.Samples.
 		// If SetWallTime was called, event duration avg = wall time / Metrics.Count
