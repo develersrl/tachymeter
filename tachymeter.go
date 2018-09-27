@@ -201,6 +201,7 @@ func (m *Metrics) JSON() string {
 // requirement but not intended for end users.
 func (m *Metrics) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
+		Name string
 		Time struct {
 			Cumulative string
 			HMean      string
@@ -224,6 +225,7 @@ func (m *Metrics) MarshalJSON() ([]byte, error) {
 		Count     int
 		Histogram *Histogram
 	}{
+		Name: m.Name,
 		Time: struct {
 			Cumulative string
 			HMean      string
