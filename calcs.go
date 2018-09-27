@@ -44,10 +44,10 @@ func (m *Tachymeter) Calc() *Metrics {
 	metrics.Time.Avg = times.avg()
 	metrics.Time.HMean = times.hMean()
 	metrics.Time.P50 = times[times.Len()/2]
-	metrics.Time.P75 = times.p(0.75)
-	metrics.Time.P95 = times.p(0.95)
-	metrics.Time.P99 = times.p(0.99)
-	metrics.Time.P999 = times.p(0.999)
+	metrics.Time.P75 = times.p(0.75, m.order)
+	metrics.Time.P95 = times.p(0.95, m.order)
+	metrics.Time.P99 = times.p(0.99, m.order)
+	metrics.Time.P999 = times.p(0.999, m.order)
 	metrics.Time.Long5p = times.long5p()
 	metrics.Time.Short5p = times.short5p()
 	metrics.Time.Min = times.min()
@@ -139,8 +139,16 @@ func (ts timeSlice) avg() time.Duration {
 	return time.Duration(total / float64(ts.Len()))
 }
 
-func (ts timeSlice) p(p float64) time.Duration {
-	return ts[int(float64(ts.Len())*p+0.5)-1]
+func (ts timeSlice) p(p float64, o Order) time.Duration {
+	if o == Descending {
+		p = 1 - p
+	}
+
+	i := int(float64(len(ts))*p+0.5) - 1
+	if i < 0 {
+		return ts[0]
+	}
+	return ts[i]
 }
 
 func (ts timeSlice) stdDev() time.Duration {

@@ -12,13 +12,25 @@ import (
 	"time"
 )
 
+// Order represents the order in which time durations should be sorted before
+// computing percentiles and other values.
+type Order bool
+
+const (
+	// Ascending sorts time durations in ascending order.
+	Ascending Order = false
+	// Descending sort time durations in descending order.
+	Descending Order = true
+)
+
 // Config holds tachymeter initialization
 // parameters. Size defines the sample capacity.
 // Tachymeter is thread safe.
 type Config struct {
 	Size  int
-	Safe  bool // Deprecated. Flag held on to as to not break existing users.
-	HBins int  // Histogram bins.
+	Safe  bool   // Deprecated. Flag held on to as to not break existing users.
+	HBins int    // Histogram bins.
+	Order Order  // Order is the sorting order (default is Ascending).
 }
 
 // Tachymeter holds event durations
@@ -30,6 +42,7 @@ type Tachymeter struct {
 	Count    uint64
 	WallTime time.Duration
 	HBins    int
+	order    Order
 }
 
 // timeslice holds time.Duration values.
@@ -87,6 +100,7 @@ func New(c *Config) *Tachymeter {
 		Size:  uint64(c.Size),
 		Times: make([]time.Duration, c.Size),
 		HBins: hSize,
+		order: c.Order,
 	}
 }
 
