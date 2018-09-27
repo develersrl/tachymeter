@@ -30,6 +30,7 @@ type Config struct {
 	Size  int
 	Safe  bool   // Deprecated. Flag held on to as to not break existing users.
 	HBins int    // Histogram bins.
+	Name  string // Name is the tachymeter of the metric represented by a tachymeter.
 	Order Order  // Order is the sorting order (default is Ascending).
 }
 
@@ -42,6 +43,7 @@ type Tachymeter struct {
 	Count    uint64
 	WallTime time.Duration
 	HBins    int
+	Name     string
 	order    Order
 }
 
@@ -60,6 +62,7 @@ type Histogram []map[string]uint64
 // Metrics holds the calculated outputs
 // produced from a Tachymeter sample set.
 type Metrics struct {
+	Name string   // Name is the metric name.
 	Time struct { // All values under Time are selected entirely from events within the sample window.
 		Cumulative time.Duration // Cumulative time of all sampled events.
 		HMean      time.Duration // Event duration harmonic mean.
@@ -100,6 +103,7 @@ func New(c *Config) *Tachymeter {
 		Size:  uint64(c.Size),
 		Times: make([]time.Duration, c.Size),
 		HBins: hSize,
+		Name:  c.Name,
 		order: c.Order,
 	}
 }

@@ -12,6 +12,7 @@ import (
 func (m *Tachymeter) Calc() *Metrics {
 	metrics := &Metrics{
 		Histogram: &Histogram{},
+		Name:      m.Name,
 	}
 
 	walltime := m.WallTime
