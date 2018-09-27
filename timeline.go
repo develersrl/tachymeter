@@ -65,15 +65,15 @@ func (t *Timeline) WriteHTMLTo(w io.Writer) error {
 
 	// Append graph + info entry for each timeline
 	// event.
-	for n := range t.timeline {
+	for n, evt := range t.timeline {
 		// Graph div.
 		fmt.Fprintf(w, `%s<div class="graph">%s`, tab, nl)
 		fmt.Fprintf(w, `%s%s<canvas id="canvas-%d"></canvas>%s`, tab, tab, n, nl)
 		fmt.Fprintf(w, `%s</div>%s`, tab, nl)
 		// Info div.
 		fmt.Fprintf(w, `%s<div class="info">%s`, tab, nl)
-		fmt.Fprintf(w, `%s<p><h2>Iteration %d</h2>%s`, tab, n+1, nl)
-		io.WriteString(w, t.timeline[n].Metrics.String())
+		fmt.Fprintf(w, `%s<p><h2>%s</h2>%s`, tab, evt.Metrics.Name, nl)
+		io.WriteString(w, evt.Metrics.String())
 		fmt.Fprintf(w, "%s%s</p></div>%s", nl, tab, nl)
 	}
 
